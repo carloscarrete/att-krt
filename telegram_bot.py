@@ -1,6 +1,8 @@
 import telebot
 import requests
 import os
+import shutil
+
 from audio_transcription import get_large_audio_transcription
 from summarization import summarize_text
 from dotenv import load_dotenv
@@ -34,6 +36,7 @@ def handle_audio(message):
         summary = summarize_text(text)
         bot.reply_to(message, summary)
         os.remove('audio.mp3')
+        shutil.rmtree('audio-chunks')
     except Exception as e:
         bot.reply_to(message, f"Ocurrió un error: {str(e)}")
 
