@@ -7,7 +7,6 @@ load_dotenv()
 openai.api_key = os.getenv('API_KEY')
 
 def summarize_text(text):
-    print('resumen')
     print(text)
     prompt = (f"Por favor, realiza un resumen en español a detalle del siguiente texto:\n"
               f"{text}\n"
@@ -15,8 +14,8 @@ def summarize_text(text):
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=prompt,
-        temperature=0.4,
-        max_tokens=500,
+        temperature=0.9,
+        max_tokens=1000,
         n=1,
         stop=None,
         timeout=30,
