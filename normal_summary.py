@@ -1,53 +1,92 @@
 import spacy
 from spacy.lang.es.stop_words import STOP_WORDS
-from collections import defaultdict
 
-nlp = spacy.load('es_core_news_sm')
+nlp = spacy.load("es_core_news_sm")
 
 def generate_summarize(text, n):
-    # Paso 2: Procesar el texto utilizando el modelo de lenguaje 'es_core_news_sm' de 'spacy'.
     doc = nlp(text)
 
-    # Paso 3: Obtener las oraciones del texto procesado.
-    sentences = [sent for sent in doc.sents]
-
-    # Paso 4: Calcular la frecuencia de cada palabra en el texto y filtrar las palabras vacías.
-    freq_words = defaultdict(int)
+    # Crear un diccionario de frecuencia de las palabras en el documento
+    word_frequencies = {}
     for token in doc:
-        if not token.is_stop:
-            freq_words[token.text] += 1
+        if token.text.lower() not in STOP_WORDS and token.is_punct == False:
+            if token.text.lower() not in word_frequencies.keys():
+                word_frequencies[token.text.lower()] = 1
+            else:
+                word_frequencies[token.text.lower()] += 1
 
-    max_freq = max(freq_words.values())
-    for word in freq_words.copy().keys():
-        if freq_words[word] < 2 or freq_words[word] == max_freq:
-            del freq_words[word]
+    # Normalizar la frecuencia de palabras
+    maximum_frequency = max(word_frequencies.values())
+    for word in word_frequencies.keys():
+        word_frequencies[word] = (word_frequencies[word] / maximum_frequency)
 
-    # Paso 5: Asignar una puntuación a cada oración en función de la frecuencia de las palabras que contiene.
-    points = defaultdict(int)
-    for i, sent in enumerate(sentences):
-        for token in sent:
-            if token.text in freq_words:
-                points[i] += freq_words[token.text]
+    # Crear un diccionario de puntuación de oraciones
+    sentence_scores = {}
+    for sent in doc.sents:
+        for word in sent:
+            if word.text.lower() in word_frequencies.keys():
+                if sent not in sentence_scores.keys():
+                    sentence_scores[sent] = word_frequencies[word.text.lower()]
+                else:
+                    sentence_scores[sent] += word_frequencies[word.text.lower()]
 
-    # Paso 6: Seleccionar las oraciones con las puntuaciones más altas y concatenarlas para formar el resumen.
-    best_sentences = sorted(points, key=points.get, reverse=True)[:n]
-    summary = [sentences[i].text for i in best_sentences]
-    return '\n'.join(summary)
+    # Ordenar las oraciones en función de su puntuación y seleccionar las n mejores
+    summarized_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:n]
 
+    # Concatenar las oraciones seleccionadas para formar el resumen
+    summarized_text = ""
+    for sentence in summarized_sentences:
+        summarized_text += sentence.text + " "
+
+    return summarized_text
+
+# Ejemplo de uso
 text = '''
-El Club Universidad Nacional, A.C. conocido popularmente como los Pumas de la UNAM,1​ es un equipo de fútbol profesional de la Primera División de México, fundado el 2 de agosto de 1954.8​ Es propiedad de la misma Universidad Nacional Autónoma de México tal cual cita su acta constitutiva,9​10​11​ pero es el patronato, desde 1977, quien administra y financia al club para no generar una carga para la misma universidad. Dicho patronato es una asociación civil conformada por universitarios destacados y empresarios, en donde el rector de la UNAM funge como presidente honorario.12​ La elección del presidente del club se decide por medio del patronato a través de la asamblea de socios del mismo club.13​ Juega sus partidos como local en el Estadio Olímpico Universitario de la Ciudad de México y sus colores tradicionales son el azul y el dorado.
+¿Quieres unirte al desafío de hacer más justo y accesible el sistema financiero para las pymes en Latinoamérica? ¡Postula para ser #Cumpler!
 
-El equipo ha ganado siete campeonatos de Liga, lo que lo ubica quinto en la historia, También ha obtenido tres Copas de Campeones de la Concacaf, siendo el quinto equipo mexicano que más veces la ha conseguido detrás de América, Cruz Azul, Pachuca y Monterrey. Además, acumula en sus logros un título de Copa México, dos de Campeón de Campeones, una Copa Interamericana y un subcampeonato en la Copa Sudamericana.
+Estamos buscando un o una FrontEnd Developer, para trabajar de manera híbrida o remota para Cumplo (Chile, Perú o México) siendo parte del área de FrontEnd.
 
-Fue el tercer equipo más popular de México detrás del Club América y el Club Deportivo Guadalajara, según las encuestas realizadas por Grupo Reforma y Consulta Mitofsky, desde el año 2013 al 2017; no obstante, considerando las mismas fuentes encuestadoras, cayó al cuarto y quinto lugar en 2018 y 2019 respectivamente.14​15​
+¿Qué estarás haciendo?
 
-Es uno de los cuatro clubes que aún permanecen en el máximo circuito, después de su primer ascenso (los otros son Toluca, Cruz Azul y Tijuana). Por lo cual cuenta con una trayectoria de 89 temporadas consecutivas en la división de honor, desde su ascenso en 1962.
+Analizar el problema de negocio y proponer una solución desde sus capacidades y el desafío, alineado al lenguaje, método y metodologías en consenso.
+Interiorizarse en el negocio y la infraestructura de Cumplo.
+Trabajar las soluciones en equipo, bajo la definición de negocio y centrado en las personas usuarias.
+Eficientar el trabajo, buscar la calidad del código y su escalabilidad.
+Sistematizar y documentar el trabajo realizado para el correcto traspaso de la información y conocimiento.
+Requisitos:
 
-Uno de los elementos que distingue al club, es el sistema de formación de futbolistas profesionales, la denominada "cantera"; esto ha permitido a la institución a través de los años haber sido cuna de destacados jugadores mexicanos, entre los que sobresalen: Enrique Borja, Aarón Padilla, Olaf Heredia, Adolfo Ríos, Leonardo Cuéllar, Luis Flores, Manuel Negrete, Miguel España, Alberto García-Aspe, Luis García Postigo, Jorge Campos, Claudio Suárez, Sergio Bernal, Braulio Luna, Israel López, Gerardo Torrado, Israel Castro, Efraín Juárez, Héctor Moreno, Pablo Barrera, Johan Vásquez y el considerado más grande jugador mexicano de todos los tiempos: el pentapichichi y miembro del once ideal histórico en el Real Madrid: Hugo Sánchez.
+Ing. Sistemas, Informática o afines.
+Sólidos conocimientos en JS, CSS y HTML, además de React
+Conocimiento de las características de ES6.
+Experiencia utilizando bibliotecas de componentes (plus si es Material UI).
+Entender y aplicar el concepto de Atomic Design.
+Experiencia de 5 años mínimo trabajando en desarrollo de software y producto.
+Beneficios de ser Cumpler:
 
-Universidad se le ha reconocido históricamente como una de las mejores canteras del fútbol mexicano, al igual, su fuerzas básicas han participado en los torneos internacionales de distintas partes del mundo.
+Contratación directa, 100% nómina.
+Días de vacaciones adicionales a las de ley al año.
+Personal Days:Día libre por cumpleaños
+Día libre por mudanza
+Días libres por matrimonio, etc.
 
-El cuadro de la UNAM es uno de los equipos que no solo ha aportado o vendido más jugadores a otros clubes de México, también es el club mexicano que ha exportado más jugadores "canteranos" a ligas del extranjero como: Hugo Sánchez, Luis García Postigo, Manuel Negrete, Luis Flores, Gerardo Torrado, Héctor Moreno, Efraín Juárez, Pablo Barrera y Johan Vásquez; asimismo sus fuerzas básicas han contribuido con jugadores a las distintas selecciones nacionales de México.
+Bono para equipo de cómputo.
+Sé parte de un equipo global de personas apasionadas y talentosas, con ganas de impactar a más pymes y familias de nuestro continente, para que puedan crecer y desarrollarse.
 
-Asimismo, directores técnicos de extracción puma han llegado a dirigir la Selección Mexicana: Bora Milutinovic, Mario Ve
+En Cumplo tenemos el compromiso de establecer un espacio laboral accesible, inclusivo y agradable, donde las y los Cumplers se sientan cómodos para poder desarrollarse profesionalmente y potenciar sus talentos. Promovemos un ambiente de respeto, compañerismo y apoyo para las y los colaboradores y clientes.
+
+Tipo de puesto: Tiempo completo
+
+Salario: $35,000.00 - $39,000.00 al mes
+
+Horario:
+
+Turno de 8 horas
+Experiencia:
+
+Frontend Developer: 3 años (Deseable)
+Atomic Design: 3 años (Des
 '''
+
+smr = generate_summarize(text, 5)
+
+print(smr)
