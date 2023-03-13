@@ -7,6 +7,7 @@ from audio_transcription import get_large_audio_transcription
 from summarization import summarize_text
 from dotenv import load_dotenv
 from normal_summary import generate_summarize
+from image_to_text import convert_to_text
 
 load_dotenv() 
 
@@ -15,9 +16,8 @@ TOKEN = os.getenv('API_SECRET')
 bot = telebot.TeleBot(TOKEN)
 isWaitingAudio = False
 
-@bot.message_handler(commands=['audio', 'resumenai' ,'help', 'resumen'])
+@bot.message_handler(commands=['audio', 'resumenai' ,'help', 'resumen', 'photo'])
 def handle_message(message):
-    print(message)
     global isWaitingAudio
     if message.text == '/audio':
         bot.reply_to(message, "Por favor, envía un archivo de audio.")
@@ -33,8 +33,14 @@ def handle_message(message):
     else:
         bot.reply_to(message, "Comando no válido.")
 
+@bot.message_handler(content_types=['photo'])
+def handle_photo(message):
+    file_info = bot.get_file(message.photo[-1].file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    text = convert_to_text(downloaded_file)
+    bot.reply_to(message, text)
+
 def summarize_message_ai(message):
-    print(message.text)
     try:
         summary = summarize_text(message.text)
         bot.reply_to(message,summary)
