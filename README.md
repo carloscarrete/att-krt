@@ -47,3 +47,4 @@ También se proporciona un archivo `.env-example` que puedes usar como plantilla
 
 ¡Siéntete libre de contribuir al proyecto! Si tienes alguna idea o sugerencia, por favor abre un issue o envía un pull request.
 
+GRACIAS
