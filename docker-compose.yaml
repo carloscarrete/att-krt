@@ -1,0 +1,10 @@
+version: '3'
+services:
+  telegran_bot:
+    build:
+      context: .
+    environment:
+      - API_SECRET=${API_SECRET}
+      - API_KEY=${API_KEY}
+    volumes:
+      - ./audio-chunks:/app/audio-chunks
